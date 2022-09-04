@@ -1,25 +1,40 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "TUSUR Course Hide",
   "description": "Надоело, что в СДО висят курсы еще со времен палеозоя? Данное улучшение спасет ваше время и нервы. P.S. За ФСУ!",
   "version": "0.9",
-
+  "action": {
+    "default_title": "TUSUR Course Hide",
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
   "content_scripts": [
     {
       "matches": [
         "https://sdo.tusur.ru/"
       ],
-      "css": ["coursehide.css"],
-      "js": ["coursehide.js"],
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "content.js",
+        "popup.js"
+      ],
       "run_at": "document_start"
     }
   ],
-
   "web_accessible_resources": [
-    "coursehide.css"
+    {
+      "resources": [
+        "content.css"
+      ],
+      "matches": [
+        "https://sdo.tusur.ru/*"
+      ]
+    }
   ],
-
   "permissions": [
+    "activeTab",
     "storage"
   ]
 }
