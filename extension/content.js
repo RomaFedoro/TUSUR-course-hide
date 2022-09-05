@@ -1,101 +1,38 @@
 (function () {
     "use strict";
-    window.parent = null;
-    window.divsParent = null;
     window.divs = [];
     window.divsInOrderCourseId = [];
-    window.firstDeleted = null;
     window.toDelete = [];
 
     init();
-
-    var parentObserver = returnParentObserver();
-    parentObserver.observe(document, { childList: true, subtree: true });
-
-    var divObserver = returnDivObserver();
-    divObserver.observe(document, { childList: true, subtree: true });
-
-    window.addEventListener("load", function () {
-        divObserver.disconnect();
-    });
+    document.addEventListener("DOMContentLoaded", app);
 })();
 
 function init() {
-    var item = localStorage.getItem("course");
-    if (item == null) window.toDelete = [];
-    else window.toDelete = JSON.parse(item);
+    const item = localStorage.getItem("course");
+    window.toDelete = item == null ? [] : JSON.parse(item);
 }
 
-function returnParentObserver() {
-    var parentObserver = new MutationObserver(function (
-        mutations,
-        parentObserver
-    ) {
-        for (var i = 0; i < mutations.length; i++) {
-            var mutationAddedNodes = mutations[i].addedNodes;
-            for (var j = 0; j < mutationAddedNodes.length; j++) {
-                var node = mutationAddedNodes[j];
-                if (
-                    node.classList &&
-                    node.classList.contains("frontpage-course-list-enrolled")
-                ) {
-                    window.divsParent = node;
-                    window.parent = node.parentElement;
-                    parentObserver.disconnect();
-                    return;
-                }
-            }
+function app() {
+    window.divsParent = document.querySelector(".courses");
+    const coursesList = window.divsParent.querySelectorAll(".coursebox");
+    console.log(coursesList);
+    for (let node of coursesList) {
+        // Store in order
+        window.divsInOrderCourseId.push(node.dataset.courseid);
+
+        // Buttons
+        // console.log(window.toDelete);
+        addButton(node, window.toDelete);
+
+        // Rearange & Add Style
+        node.classList.remove("odd", "even", "first");
+        if (window.toDelete.includes(node.dataset.courseid)) {
+            node.classList.add("ch_hidden_course");
+            window.divs.push(node);
+            window.divsParent.appendChild(node);
         }
-    });
-    return parentObserver;
-}
-
-function returnDivObserver() {
-    var divObserver = new MutationObserver(function (mutations, divObserver) {
-        for (var i = 0; i < mutations.length; i++) {
-            var mutationAddedNodes = mutations[i].addedNodes;
-            for (var j = 0; j < mutationAddedNodes.length; j++) {
-                var node = mutationAddedNodes[j];
-                if (node.classList && node.classList.contains("coursebox")) {
-                    // Store in order
-                    divsInOrderCourseId.push(node.dataset.courseid);
-
-                    // Buttons
-                    console.log(window.toDelete);
-                    addButton(node, window.toDelete);
-
-                    // Rearange & Add Style
-                    node.classList.remove("odd", "even", "first");
-                    divObserver.disconnect();
-                    if (toDelete.includes(node.dataset.courseid)) {
-                        if (window.firstDeleted == null)
-                            window.firstDeleted = node;
-                        else window.divsParent.insertBefore(node, null);
-                        node.classList.add("ch_hidden_course");
-                        divs.push(node);
-                    } else {
-                        if (firstDeleted != null) {
-                            window.divsParent.insertBefore(
-                                node,
-                                window.firstDeleted
-                            );
-                            window.divs.splice(
-                                divs.indexOf(window.firstDeleted),
-                                0,
-                                node
-                            );
-                        } else divs.push(node);
-                    }
-
-                    divObserver.observe(document, {
-                        childList: true,
-                        subtree: true,
-                    });
-                }
-            }
-        }
-    });
-    return divObserver;
+    }
 }
 
 function updateToDelete(entries) {
