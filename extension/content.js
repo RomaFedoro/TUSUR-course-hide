@@ -1,13 +1,6 @@
-(function () {
-    "use strict";
-    window.divs = [];
-    window.divsInOrderCourseId = [];
-    window.toDelete = getHiddenCourses();
-    console.log(toDelete);
-    const coursList = [];
-    const hiddenCourses = getHiddenCourses();
-    document.addEventListener("DOMContentLoaded", app);
-})();
+"use strict";
+const coursesList = [];
+let hiddenCourses = getHiddenCourses();
 
 function getHiddenCourses() {
     const item = localStorage.getItem("course");
@@ -16,21 +9,19 @@ function getHiddenCourses() {
 
 function app() {
     const coursesNode = document.querySelector(".courses");
-    const coursesList = coursesNode.querySelectorAll(".coursebox");
+    const courseNodeList = coursesNode.querySelectorAll(".coursebox");
 
-    for (let node of coursesList) {
-        const courseId = node.dataset.courseid;
-        // Store in order
-        divsInOrderCourseId.push(courseId);
+    for (let course of courseNodeList) {
+        const courseId = course.dataset.courseid;
+        coursesList.push(courseId);
 
-        addHideCheckbox(node, toDelete);
+        addHideCheckbox(course, hiddenCourses);
 
         // Rearange & Add Style
-        node.classList.remove("odd", "even", "first");
-        if (toDelete.includes(courseId)) {
-            node.classList.add("ch_hidden_course");
-            divs.push(node);
-            coursesNode.appendChild(node);
+        course.classList.remove("odd", "even", "first");
+        if (hiddenCourses.includes(courseId)) {
+            course.classList.add("ch_hidden_course");
+            coursesNode.appendChild(course);
         }
     }
 }
@@ -38,12 +29,10 @@ function app() {
 const getCourseNode = (courseId) =>
     document.querySelector(`.coursebox[data-courseid="${courseId}"]`);
 
-function updateLocalStorage(entries) {
-    toDelete = entries;
+const updateLocalStorage = (entries) =>
     localStorage.setItem("course", JSON.stringify(entries));
-}
 
-function addHideCheckbox(node, hiddenCourses) {
+function addHideCheckbox(node) {
     const courseId = node.dataset.courseid;
 
     const checkbox = document.createElement("input");
@@ -52,26 +41,23 @@ function addHideCheckbox(node, hiddenCourses) {
     checkbox.checked = hiddenCourses.includes(courseId);
 
     checkbox.addEventListener("input", function () {
+        let updatedHiddenCourses;
+
         if (this.checked) {
-            hideСourse(courseId, hiddenCourses);
+            updatedHiddenCourses = [...hiddenCourses, courseId];
             node.classList.add("ch_hidden_course");
         } else {
-            showСourse(courseId, hiddenCourses);
+            updatedHiddenCourses = hiddenCourses.filter(
+                (el) => el !== courseId
+            );
             node.classList.remove("ch_hidden_course");
         }
+
+        updateLocalStorage(updatedHiddenCourses);
+        hiddenCourses = updatedHiddenCourses;
     });
 
     node.appendChild(checkbox);
 }
 
-function showСourse(courseId, hiddenCourses) {
-    // delete from list toDelete
-    const updatedHiddenCourses = hiddenCourses.filter((el) => el !== courseId);
-    updateLocalStorage(updatedHiddenCourses);
-}
-
-function hideСourse(courseId, hiddenCourses) {
-    // add to toDelete
-    hiddenCourses.push(courseId);
-    updateLocalStorage(hiddenCourses);
-}
+document.addEventListener("DOMContentLoaded", app);
