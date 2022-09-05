@@ -24,15 +24,12 @@
     color: #53798b;
 }
 
-.ch_btn_div {
+.ch_btn {
     position: absolute;
     bottom: 0;
     right: 0;
     margin-right: 10px;
     margin-bottom: 10px;
-}
-
-.ch_btn {
     width: 25.75px;
     height: 27.27px;
 }

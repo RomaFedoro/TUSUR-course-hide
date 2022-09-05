@@ -2,133 +2,76 @@
     "use strict";
     window.divs = [];
     window.divsInOrderCourseId = [];
-    window.toDelete = [];
-
-    init();
+    window.toDelete = getHiddenCourses();
+    console.log(toDelete);
+    const coursList = [];
+    const hiddenCourses = getHiddenCourses();
     document.addEventListener("DOMContentLoaded", app);
 })();
 
-function init() {
+function getHiddenCourses() {
     const item = localStorage.getItem("course");
-    window.toDelete = item == null ? [] : JSON.parse(item);
+    return item === null ? [] : JSON.parse(item);
 }
 
 function app() {
-    window.divsParent = document.querySelector(".courses");
-    const coursesList = window.divsParent.querySelectorAll(".coursebox");
-    console.log(coursesList);
-    for (let node of coursesList) {
-        // Store in order
-        window.divsInOrderCourseId.push(node.dataset.courseid);
+    const coursesNode = document.querySelector(".courses");
+    const coursesList = coursesNode.querySelectorAll(".coursebox");
 
-        // Buttons
-        // console.log(window.toDelete);
-        addButton(node, window.toDelete);
+    for (let node of coursesList) {
+        const courseId = node.dataset.courseid;
+        // Store in order
+        divsInOrderCourseId.push(courseId);
+
+        addHideCheckbox(node, toDelete);
 
         // Rearange & Add Style
         node.classList.remove("odd", "even", "first");
-        if (window.toDelete.includes(node.dataset.courseid)) {
+        if (toDelete.includes(courseId)) {
             node.classList.add("ch_hidden_course");
-            window.divs.push(node);
-            window.divsParent.appendChild(node);
+            divs.push(node);
+            coursesNode.appendChild(node);
         }
     }
 }
 
-function updateToDelete(entries) {
-    window.toDelete = entries;
+const getCourseNode = (courseId) =>
+    document.querySelector(`.coursebox[data-courseid="${courseId}"]`);
+
+function updateLocalStorage(entries) {
+    toDelete = entries;
     localStorage.setItem("course", JSON.stringify(entries));
 }
 
-function addButton(node, toDeleteHere) {
-    var btn = document.createElement("button");
-    var btndiv = document.createElement("div");
+function addHideCheckbox(node, hiddenCourses) {
+    const courseId = node.dataset.courseid;
 
-    btn.name = node.dataset.courseid;
-    btn.classList.add("ch_btn");
-    btndiv.classList.add("ch_btn_div");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = courseId;
+    checkbox.checked = hiddenCourses.includes(courseId);
 
-    if (toDeleteHere.includes(node.dataset.courseid)) {
-        btn.classList.add("ch_btn_deleted");
-        btn.type = "deleted";
-        btn.onclick = function () {
-            deleteEntry(this);
-        };
-    } else {
-        btn.classList.add("ch_btn_allowed");
-        btn.type = "allowed";
-        btn.onclick = function () {
-            addEntry(this);
-        };
-    }
+    checkbox.addEventListener("input", function () {
+        if (this.checked) {
+            hideСourse(courseId, hiddenCourses);
+            node.classList.add("ch_hidden_course");
+        } else {
+            showСourse(courseId, hiddenCourses);
+            node.classList.remove("ch_hidden_course");
+        }
+    });
 
-    node.appendChild(btndiv);
-    btndiv.appendChild(btn);
+    node.appendChild(checkbox);
 }
 
-function deleteEntry(btn) {
-    var courseid = btn.name;
-
+function showСourse(courseId, hiddenCourses) {
     // delete from list toDelete
-    var arr = window.toDelete;
-    var ind = arr.indexOf(courseid);
-    if (ind == -1) return;
-    arr.splice(ind, 1);
-    updateToDelete(arr);
-
-    // reorg
-    var coursediv = findCourseDiv(courseid);
-    coursediv.classList.remove("ch_hidden_course");
-
-    // add new button
-    btn.remove();
-    addButton(coursediv, window.toDelete);
+    const updatedHiddenCourses = hiddenCourses.filter((el) => el !== courseId);
+    updateLocalStorage(updatedHiddenCourses);
 }
 
-function addEntry(btn) {
-    var courseid = btn.name;
-
+function hideСourse(courseId, hiddenCourses) {
     // add to toDelete
-    var arr = window.toDelete;
-    if (arr.indexOf(courseid) == -1) arr.push(courseid);
-    updateToDelete(arr);
-
-    // reorg
-    var coursediv = findCourseDiv(courseid);
-    coursediv.classList.add("ch_hidden_course");
-
-    // add new button
-    btn.remove();
-    addButton(coursediv, window.toDelete);
-}
-
-function findCourseDiv(courseid) {
-    for (var i = 0; i < divs.length; i++) {
-        if (window.divs[i].dataset.courseid == courseid) return window.divs[i];
-    }
-    return null;
-}
-
-function findClosestAllowedNeighboor(courseid) {
-    for (
-        var i = divsInOrderCourseId.indexOf(courseid) + 1;
-        i < divsInOrderCourseId.length;
-        i++
-    ) {
-        if (!toDelete.includes(divsInOrderCourseId[i]))
-            return findCourseDiv(divsInOrderCourseId[i]);
-    }
-    return null;
-}
-
-function findClosestDisallowedNeighboor(courseid) {
-    for (
-        var i = divsInOrderCourseId.indexOf(courseid) + 1;
-        i < divsInOrderCourseId.length;
-        i++
-    ) {
-        if (toDelete.includes(divsInOrderCourseId[i]))
-            return findCourseDiv(divsInOrderCourseId[i]);
-    }
-    return null;
+    hiddenCourses.push(courseId);
+    updateLocalStorage(hiddenCourses);
 }
