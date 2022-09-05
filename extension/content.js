@@ -35,10 +35,15 @@ const updateLocalStorage = (entries) =>
 function addHideCheckbox(node) {
     const courseId = node.dataset.courseid;
 
+    const label = document.createElement("label");
+    label.classList.add("ch_checkbox");
+
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.value = courseId;
     checkbox.checked = hiddenCourses.includes(courseId);
+
+    if (checkbox.checked) label.classList.add("ch_checkbox_active");
 
     checkbox.addEventListener("input", function () {
         let updatedHiddenCourses;
@@ -46,18 +51,21 @@ function addHideCheckbox(node) {
         if (this.checked) {
             updatedHiddenCourses = [...hiddenCourses, courseId];
             node.classList.add("ch_hidden_course");
+            label.classList.add("ch_checkbox_active");
         } else {
             updatedHiddenCourses = hiddenCourses.filter(
                 (el) => el !== courseId
             );
             node.classList.remove("ch_hidden_course");
+            label.classList.remove("ch_checkbox_active");
         }
 
         updateLocalStorage(updatedHiddenCourses);
         hiddenCourses = updatedHiddenCourses;
     });
 
-    node.appendChild(checkbox);
+    label.appendChild(checkbox);
+    node.appendChild(label);
 }
 
 document.addEventListener("DOMContentLoaded", app);
