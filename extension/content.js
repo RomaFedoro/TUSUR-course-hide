@@ -65,12 +65,12 @@ function returnDivObserver() {
                     addButton(node, window.toDelete);
 
                     // Rearange & Add Style
+                    node.classList.remove("odd", "even", "first");
                     divObserver.disconnect();
                     if (toDelete.includes(node.dataset.courseid)) {
                         if (window.firstDeleted == null)
                             window.firstDeleted = node;
                         else window.divsParent.insertBefore(node, null);
-                        node.classList.remove("odd", "even", "first");
                         node.classList.add("ch_hidden_course");
                         divs.push(node);
                     } else {
@@ -85,13 +85,6 @@ function returnDivObserver() {
                                 node
                             );
                         } else divs.push(node);
-
-                        // Fix color
-                        var index = window.divs.indexOf(node);
-                        node.classList.remove("odd", "even", "first");
-                        if (index == 0) node.classList.add("first");
-                        if (index % 2 == 0) node.classList.add("odd");
-                        else node.classList.add("even");
                     }
 
                     divObserver.observe(document, {
@@ -153,9 +146,6 @@ function deleteEntry(btn) {
     // add new button
     btn.remove();
     addButton(coursediv, window.toDelete);
-
-    // color
-    fixColor();
 }
 
 function addEntry(btn) {
@@ -173,9 +163,6 @@ function addEntry(btn) {
     // add new button
     btn.remove();
     addButton(coursediv, window.toDelete);
-
-    // color
-    fixColor();
 }
 
 function findCourseDiv(courseid) {
@@ -207,23 +194,4 @@ function findClosestDisallowedNeighboor(courseid) {
             return findCourseDiv(divsInOrderCourseId[i]);
     }
     return null;
-}
-
-function fixColor() {
-    var i;
-    for (i = 0; i < divs.length; i++) {
-        divs[i].classList.remove("first", "odd", "even", "last");
-        if (i == divs.length - 1) divs[i].classList.add("last");
-    }
-    for (i = 0; i < divs.length; i += 2) {
-        if (divs[i].classList.contains("ch_hidden_course")) continue;
-        divs[i].classList.add("odd");
-    }
-    for (i = 1; i < divs.length; i += 2) {
-        if (divs[i].classList.contains("ch_hidden_course")) continue;
-        divs[i].classList.add("even");
-    }
-
-    if (divs.length > 0 && !divs[i].classList.contains("ch_hidden_course"))
-        divs[0].classList.add("first");
 }
